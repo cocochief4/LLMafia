@@ -1,9 +1,9 @@
-# LLMafia
+# Asynchronous LLM Agent - LLMafia
 
-Our Mafia games dataset and code, of an **Asynchronous LLM Agent** playing games of Mafia with multiple human players.
+Our Mafia games dataset and code, of an **Asynchronous LLM Agent** playing games of *Mafia* with multiple human players.
 
 <p align="center">
-    <a href="https://arxiv.org/abs/2506.05309">Paper (preprint)</a><br>
+    <a href="https://arxiv.org/abs/2506.05309">Check out the "Time to Talk" paper (preprint)</a><br>
 </p>
 
 ![](figures/llmafia_cover_figure.gif)
@@ -25,7 +25,7 @@ In our paper we propose an agent designed for asynchronous conversations. Our ag
 
 ## The game of Mafia
 
-<img align="right" src="figures/game_rules.png">
+<img align="right"  width="250"  src="figures/game_rules.png">
 
 *Mafia*, a social deduction game in which each player is secretly assigned a role, either *mafia* or *bystander*. Only mafia players are aware of all players' roles. Every round starts with a daytime phase, where all players discuss who they think the mafia players might be, and vote out one player. Then the game moves to a nighttime phase, where only mafia players interact and vote to decide which bystander they want to eliminate. In the next round's daytime, the mafia's victim is revealed. The game continues until one of the teams achieves their objective: the mafia's goal is to outnumber the bystanders, and the bystanders' goal is to vote out all mafia.
 
