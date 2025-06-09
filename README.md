@@ -23,17 +23,25 @@ In our paper we propose an agent designed for asynchronous conversations. Our ag
 ![](figures/agent_logic_design_figure.gif)
 *Schematic display of the agent's logic design. A detailed overview of the agent's structure can be found in our paper.*
 
-## The game of Mafia
+## The Game of Mafia
 
 <img align="right"  width="250"  src="figures/game_rules.png">
 
-*Mafia*, a social deduction game in which each player is secretly assigned a role, either *mafia* or *bystander*. Only mafia players are aware of all players' roles. Every round starts with a daytime phase, where all players discuss who they think the mafia players might be, and vote out one player. Then the game moves to a nighttime phase, where only mafia players interact and vote to decide which bystander they want to eliminate. In the next round's daytime, the mafia's victim is revealed. The game continues until one of the teams achieves their objective: the mafia's goal is to outnumber the bystanders, and the bystanders' goal is to vote out all mafia.
+We choose to set our evaluation of asynchrony modeling for LLMs in a game setting.
+
+Games give each participant an objective. Winning the game is a proxy metric of whether the communication was successful. It sets the conversation under a frame of rules, where each participant needs to use the communication to advance to their target.
+
+We choose *Mafia*, a social deduction game in which each player is secretly assigned a role, either *mafia* or *bystander*. Only mafia players are aware of all players' roles. Every round starts with a daytime phase, where all players discuss who they think the mafia players might be, and vote out one player. Then the game moves to a nighttime phase, where only mafia players interact and vote to decide which bystander they want to eliminate. In the next round's daytime, the mafia's victim is revealed. The game continues until one of the teams achieves their objective: the mafia's goal is to outnumber the bystanders, and the bystanders' goal is to vote out all mafia.
+
+We choose the game of Mafia for evaluating our several reasons. First, it can be based solely on textual interaction, which allows LLMs to play together with human players. Second, it requires collaboration under uncertainty, making communication between participants a fundamental aspect of the game. Third, it centers around suspicion of other players, so both extreme strategies of constantly speaking or not speaking at all can be seen as suspicious. Therefore, the timing of communication is crucial for the player's success.
 
 
 ## LLMafia Dataset
 
 The collected data of games is available under the `games` directory.
 Each game subdirectory contains files with the messages sent by all players, human and LLM, in addition to game-management messages, metadata, results and each game's configuration (after being anonymized).
+
+Analysis of the dataset is described thoroughly in our paper, with a focus on our LLM agent performance in the game from different perspectives.
 
 
 ## Citation
