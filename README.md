@@ -1,7 +1,3 @@
----
-arxiv: 2506.05309
----
-
 # LLMafia - Asynchronous LLM Agent
 
 Our Mafia games dataset and code, of an **Asynchronous LLM Agent** playing games of *Mafia* with multiple human players.
