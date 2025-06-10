@@ -2,9 +2,8 @@
 
 Our Mafia games dataset and code, of an **Asynchronous LLM Agent** playing games of *Mafia* with multiple human players.
 
-<p align="center">
-    <a href="https://arxiv.org/abs/2506.05309">Check out the "Time to Talk" paper (preprint)</a><br>
-</p>
+Check out our (preprint) paper "Time to Talk": https://arxiv.org/abs/2506.05309 
+
 
 ![](figures/llmafia_cover_figure.gif)
 *A virtual game of Mafia, played by human players and an LLM agent player. The agent integrates in the asynchronous group conversation by constantly simulating the decision to send a message.*
