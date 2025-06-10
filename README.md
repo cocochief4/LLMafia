@@ -1,8 +1,13 @@
+---
+arxiv: 2506.05309
+---
+
 # LLMafia - Asynchronous LLM Agent
 
 Our Mafia games dataset and code, of an **Asynchronous LLM Agent** playing games of *Mafia* with multiple human players.
 
-Check out our (preprint) paper "Time to Talk": https://arxiv.org/abs/2506.05309 
+Check out our (preprint) paper "Time to Talk":
+https://arxiv.org/abs/2506.05309 
 
 
 ![](figures/llmafia_cover_figure.gif)
