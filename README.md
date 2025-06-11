@@ -2,8 +2,9 @@
 
 Our Mafia games code for an **Asynchronous LLM Agent** playing games of *Mafia* with multiple human players.
 
-Check out our (preprint) paper "Time to Talk":
-https://arxiv.org/abs/2506.05309 
+<p align="center">
+    🌐 <a href="https://niveck.github.io/Time-to-Talk/" target="_blank">Project</a> | 📃 <a href="https://arxiv.org/abs/2506.05309" target="_blank">Paper</a> | 📚 <a href="https://huggingface.co/datasets/niveck/LLMafia" target="_blank">Dataset</a><br>
+</p>
 
 
 ![](figures/llmafia_cover_figure.gif)
