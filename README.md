@@ -1,6 +1,6 @@
 # LLMafia - Asynchronous LLM Agent
 
-Our Mafia games dataset and code, of an **Asynchronous LLM Agent** playing games of *Mafia* with multiple human players.
+Our Mafia games code, of an **Asynchronous LLM Agent** playing games of *Mafia* with multiple human players.
 
 Check out our (preprint) paper "Time to Talk":
 https://arxiv.org/abs/2506.05309 
@@ -40,6 +40,8 @@ We choose the game of Mafia for evaluating our several reasons. First, it can be
 
 The collected data of games is available under the `games` directory.
 Each game subdirectory contains files with the messages sent by all players, human and LLM, in addition to game-management messages, metadata, results and each game's configuration (after being anonymized).
+
+For a detailed overview of the dataset and files and for accessible download, [visit the dataset page on HuggingFace](https://huggingface.co/datasets/niveck/LLMafia).   
 
 Analysis of the dataset is described thoroughly in our paper, with a focus on our LLM agent performance in the game from different perspectives.
 
