@@ -1,6 +1,6 @@
 # LLMafia - Asynchronous LLM Agent
 
-Our Mafia games code, of an **Asynchronous LLM Agent** playing games of *Mafia* with multiple human players.
+Our Mafia games code for an **Asynchronous LLM Agent** playing games of *Mafia* with multiple human players.
 
 Check out our (preprint) paper "Time to Talk":
 https://arxiv.org/abs/2506.05309 
