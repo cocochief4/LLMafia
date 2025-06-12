@@ -61,7 +61,3 @@ If you find this useful for your research, please use the following:
       url={https://arxiv.org/abs/2506.05309}, 
 }
 ```
-
-## Contact
-
-For any enquiry you can contact us at: niv.eckhaus@mail.huji.ac.il
