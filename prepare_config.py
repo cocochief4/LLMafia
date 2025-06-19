@@ -67,8 +67,8 @@ def parse_args():
                         help="total number of players in game")
     parser.add_argument("-m", "--mafia", type=int, default=None,
                         help="number of mafia players in game")
-    parser.add_argument("-l", "--llm", type=int, default=1, choices=[0, 1],
-                        # since participants will rank the (single) LLM player performance
+    parser.add_argument("-l", "--llm", type=int, default=1, # choices=[0, 1],
+                        # Try to remove the choices argument to allow more than 1 LLM player
                         help="number of LLM players in game, currently supports maximum 1")
     parser.add_argument("-b", "--bystander", action="store_true",
                         help="whether the LLM player can only be bystander (not mafia)")
