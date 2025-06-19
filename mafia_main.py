@@ -8,6 +8,24 @@ game_dir = Path()  # will be updated only if __name__ == __main__ (prevents new 
 
 
 class Player:
+    """
+    Represents a player in the Mafia game, managing their chat, vote, and status files.
+    Attributes:
+        name (str): The player's name.
+        is_mafia (bool): Whether the player is a mafia member.
+        personal_chat_file (Path): Path to the player's personal chat file.
+        personal_chat_file_lines_read (int): Number of chat lines already read.
+        personal_vote_file (Path): Path to the player's personal vote file.
+        personal_vote_file_lines_read (int): Number of vote lines already read.
+        personal_status_file (Path): Path to the player's personal status file.
+    Methods:
+        get_new_messages():
+            Reads and returns new chat messages for the player since the last check.
+        get_voted_player():
+            Reads and returns the most recent player voted for by this player, if any.
+        eliminate():
+            Marks the player as eliminated by updating their status file.
+    """
 
     def __init__(self, name, is_mafia, **kwargs):
         self.name = name
@@ -40,16 +58,51 @@ class Player:
 
 
 def get_config():
+    """
+    Reads the game configuration file and returns its contents as a dictionary.
+
+    Returns:
+        dict: The configuration data loaded from the JSON file.
+
+    Raises:
+        FileNotFoundError: If the configuration file does not exist.
+        json.JSONDecodeError: If the file is not a valid JSON.
+    """
     with open(game_dir / GAME_CONFIG_FILE, "r") as f:
         config = json.load(f)
     return config
 
 
 def get_players(config):
+    """
+    Creates and returns a list of Player objects based on the provided configuration.
+
+    Args:
+        config (dict): A configuration dictionary containing player information under the key specified by PLAYERS_KEY_IN_CONFIG.
+
+    Returns:
+        list[Player]: A list of Player instances created from the configuration.
+
+    Raises:
+        KeyError: If PLAYERS_KEY_IN_CONFIG is not present in the config dictionary.
+        TypeError: If player configuration is not compatible with the Player constructor.
+    """
     return [Player(**player_config) for player_config in config[PLAYERS_KEY_IN_CONFIG]]
 
 
 def is_win_by_bystanders(mafia_players):
+    """
+    Checks if the bystanders have won the game by verifying if there are no remaining mafia players.
+
+    If the list of mafia players is empty, writes the bystanders' win message to the designated file
+    and returns True. Otherwise, returns False.
+
+    Args:
+        mafia_players (list): A list containing the current mafia players.
+
+    Returns:
+        bool: True if bystanders win (no mafia players left), False otherwise.
+    """
     if len(mafia_players) == 0:
         (game_dir / WHO_WINS_FILE).write_text(BYSTANDERS_WIN_MESSAGE)
         return True
@@ -57,6 +110,19 @@ def is_win_by_bystanders(mafia_players):
 
 
 def is_win_by_mafia(mafia_players, bystanders):
+    """
+    Determines if the mafia team has won the game.
+
+    A win for the mafia occurs when the number of mafia players is greater than or equal to the number of bystanders.
+    If the mafia wins, a message is written to the designated file.
+
+    Args:
+        mafia_players (list): List of players identified as mafia.
+        bystanders (list): List of players identified as bystanders.
+
+    Returns:
+        bool: True if the mafia wins, False otherwise.
+    """
     if len(mafia_players) >= len(bystanders):
         (game_dir / WHO_WINS_FILE).write_text(MAFIA_WINS_MESSAGE)
         return True

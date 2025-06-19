@@ -55,5 +55,5 @@
     "daytime_minutes": 2,
     "nighttime_minutes": 0.75,
     "notes": "",
-    "preparation_command": "C:\\Users\\nivec\\OneDrive\\Desktop\\University\\Mafia\\Async-Mafia-LLM\\prepare_config.py -p 5 -n configurations/name_files/rehearsal.txt -o together_rehearsal.json"
+    "preparation_command": "C:\\Users\\nive\\OneDrive - Mobileye\\Desktop\\University\\Async-Mafia-LLM\\prepare_config.py -p 5 -n configurations/name_files/rehearsal.txt -o together_rehearsal.json"
 }
