@@ -2,7 +2,7 @@ import re
 from game_constants import REMAINING_PLAYERS_FILE, GAME_MANAGER_NAME, MESSAGE_PARSING_PATTERN
 from game_status_checks import is_nighttime
 from llm_players.llm_constants import turn_task_into_prompt, SCHEDULE_THEN_GENERATE_TYPE, \
-    make_more_human_like, SCHEDULING_GENERATION_PARAMETERS, TALKATIVE_PROMPT, QUIETER_PROMPT
+    make_more_human_like, SCHEDULING_GENERATION_PARAMETERS, TALKATIVE_PROMPT, ALT_TALKATIVE_PROMPT, QUIETER_PROMPT
 from llm_players.llm_player import LLMPlayer
 from llm_players.llm_wrapper import LLMWrapper
 
@@ -28,8 +28,9 @@ class ScheduleThenGeneratePlayer(LLMPlayer):
         self.scheduler = self.llm  # using the same one for generation...
 
     def should_generate_message(self, message_history):
-        if no_one_has_talked_yet_in_current_phase(message_history):
-            return False
+        # Make sure that this AI has the capability to be the first one to contribute to a conversation!
+        # if no_one_has_talked_yet_in_current_phase(message_history):
+            # return False
         prompt = self.create_scheduling_prompt(message_history)
         self.logger.log("prompt in should_generate_message", prompt)
         decision = self.scheduler.generate(
@@ -51,7 +52,7 @@ class ScheduleThenGeneratePlayer(LLMPlayer):
 
     def talkative_scheduling_prompt_modifier(self, message_history):
         if not message_history or is_nighttime(self.game_dir):
-            return TALKATIVE_PROMPT
+            return ALT_TALKATIVE_PROMPT
         all_players = (self.game_dir / REMAINING_PLAYERS_FILE).read_text().splitlines()
         players_counts = {player: 0 for player in all_players}
         for message in message_history[::-1]:
@@ -71,14 +72,14 @@ class ScheduleThenGeneratePlayer(LLMPlayer):
     def create_scheduling_prompt(self, message_history):
         # removed these because of too many talks:
         # "If one of the last messages has mentioned you, then choose to send a message now."
-        task = f"Do you want to send a message to the group chat now, or do you prefer to wait " \
+        task = (f"Do you want to send a message to the group chat now, or do you prefer to wait " \
                f"for now and see what messages others will send? " \
                f"Remember to choose to send a message only if your contribution to the " \
                f"discussion in the current time will be meaningful enough. " \
                f"{self.talkative_scheduling_prompt_modifier(message_history).strip()} " \
                f"Reply only with `{self.use_turn_token}` if you want to send a message now, " \
                f"or only with `{self.pass_turn_token}` if you want to wait for now, " \
-               f"based on your decision! "
+               f"based on your decision! ")
         return turn_task_into_prompt(task, message_history)
 
     def create_generation_prompt(self, message_history):

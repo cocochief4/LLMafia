@@ -131,6 +131,8 @@ SCHEDULING_GENERATION_PARAMETERS = TOGETHER_SCHEDULING_GENERATION_PARAMETERS
 TALKATIVE_PROMPT = "Make sure to say something every once in a while, and make yourself heard. " \
                    "Remember you like to be active in the game, so participate and be " \
                    "as talkative as other players! "
+ALT_TALKATIVE_PROMPT = "You really should say something right now, to make sure you are contributing " \
+                       "to the conversation. Remember, mafia is not fun if no one communicates! "
 QUIETER_PROMPT = "Don't overflow the discussion with your messages! " \
                  "Pay attention to the amount of messages with your name compared to the amount " \
                  "of messages with names of other players and let them have their turn too! " \

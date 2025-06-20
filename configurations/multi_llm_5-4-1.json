@@ -2,7 +2,7 @@
     "players": [
         {
             "name": "Ashton",
-            "is_mafia": false,
+            "is_mafia": true,
             "is_llm": true,
             "real_name": "LLM1",
             "llm_config": {
@@ -48,7 +48,7 @@
         },
         {
             "name": "Avery",
-            "is_mafia": true,
+            "is_mafia": false,
             "is_llm": false,
             "real_name": "chris",
             "llm_config": {}
@@ -100,7 +100,7 @@
             }
         }
     ],
-    "daytime_minutes": 1.0,
+    "daytime_minutes": 1.5,
     "nighttime_minutes": 0.5,
     "notes": "5 players, 4 llm, 1 mafia",
     "preparation_command": ".\\prepare_config.py -o multi_llm_5-4-1 -p 5 -l 4 -m 1 -dt 1 -nt 0.5"
