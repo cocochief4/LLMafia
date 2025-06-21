@@ -7,8 +7,9 @@ from game_constants import get_current_timestamp
 from llm_players.llm_constants import TASK2OUTPUT_FORMAT, INITIAL_GENERATION_PROMPT, \
     INSTRUCTION_INPUT_RESPONSE_PATTERN, LLAMA3_PATTERN, DEFAULT_PROMPT_PATTERN, NUM_BEAMS_KEY, \
     MODEL_NAME_KEY, USE_PIPELINE_KEY, PIPELINE_TASK_KEY, MAX_NEW_TOKENS_KEY, GENERAL_SYSTEM_INFO, \
-    REPETITION_PENALTY_KEY, GENERATION_PARAMETERS, USE_TOGETHER_KEY, TOGETHER_API_KEY_KEYWORD, \
-    SECRETS_DICT_FILE_PATH, SLEEPING_TIME_FOR_API_GENERATION_ERROR, HUGGINGFACE_GENERATION_PARAMETERS
+    REPETITION_PENALTY_KEY, GENERATION_PARAMETERS, USE_TOGETHER_KEY, USE_OPENAI_KEY, TOGETHER_API_KEY_KEYWORD, \
+    SECRETS_DICT_FILE_PATH, SLEEPING_TIME_FOR_API_GENERATION_ERROR, HUGGINGFACE_GENERATION_PARAMETERS, \
+    OPENAI_GENERATION_PARAMETERS, OPENAI_API_KEY_KEYWORD
 
 print("Trying to import torch...", get_current_timestamp())
 import torch
@@ -20,6 +21,9 @@ print("Finished importing from transformers!", get_current_timestamp())
 
 from together import Together
 from together.error import TogetherException
+
+from openai import OpenAI
+from openai import OpenAIError
 
 CACHE_DIR = os.path.expanduser("~/.cache/huggingface/hub")
 
@@ -61,6 +65,20 @@ def get_together_api_key():
         print("\n\n\nMISSING SECRETS DICT FILE!!!!!\n\n\n")
     return None
 
+def get_openai_api_key():
+    key = os.environ.get(OPENAI_API_KEY_KEYWORD)
+    if key:
+        return key
+    secrets_file = Path(SECRETS_DICT_FILE_PATH)
+    if secrets_file.exists():
+        try:
+            secrets = eval(secrets_file.read_text())
+        except (ValueError, NameError):
+            return None
+        return secrets.get(OPENAI_API_KEY_KEYWORD)
+    else:
+        print("\n\n\nMISSING SECRETS DICT FILE!!!!!\n\n\n")
+    return None
 
 class LLMWrapper:
 
@@ -69,6 +87,7 @@ class LLMWrapper:
         self.model_name = llm_config[MODEL_NAME_KEY]
         self.use_together = llm_config.get(USE_TOGETHER_KEY)
         self.use_pipeline = llm_config[USE_PIPELINE_KEY]
+        self.use_openai = llm_config[USE_OPENAI_KEY]
         self.pipeline_task = llm_config[PIPELINE_TASK_KEY]
         '''
             If using Together (use_together = true), then the generation parameters
@@ -82,6 +101,11 @@ class LLMWrapper:
         if self.use_together:
             self.generation_parameters = {key: value for key, value in llm_config.items()
                                           if key in GENERATION_PARAMETERS}
+            self.generation_parameters[MAX_NEW_TOKENS_KEY] = llm_config.get(MAX_NEW_TOKENS_KEY, 25)
+        elif self.use_openai:
+            self.generation_parameters = {key: value for key, value in llm_config.items()
+                                          if key in OPENAI_GENERATION_PARAMETERS}
+            self.generation_parameters[MAX_NEW_TOKENS_KEY] = llm_config.get(MAX_NEW_TOKENS_KEY, 25)
         elif self.use_pipeline:
             self.generation_parameters = {key: value for key, value in llm_config.items()
                                           if key in HUGGINGFACE_GENERATION_PARAMETERS}
@@ -93,6 +117,9 @@ class LLMWrapper:
         self.prompt_template = self._get_prompt_template()
         if self.use_together:
             self.client = Together(api_key=get_together_api_key())
+            self.pipeline = self.tokenizer = self.model = None
+        elif self.use_openai:
+            self.client = OpenAI(api_key=get_openai_api_key())
             self.pipeline = self.tokenizer = self.model = None
         elif self.use_pipeline:
             self.pipeline = cached_pipeline(self.model_name, self.pipeline_task)
@@ -116,6 +143,7 @@ class LLMWrapper:
         else:
             return DEFAULT_PROMPT_PATTERN
 
+    # TODO: Check if I am supposed to use this method for OpenAI models, or direct_preprocessing.
     def pipeline_preprocessing(self, input_text, system_info):
         if self.prompt_template in (INSTRUCTION_INPUT_RESPONSE_PATTERN, LLAMA3_PATTERN):
             system_message = [{"role": "system", "content": system_info}] if system_info else []
@@ -124,6 +152,7 @@ class LLMWrapper:
             raise NotImplementedError("Used model doesn't support pipeline, "
                                       "try `use_pipeline=False` in config")
 
+    # TODO: Add openai preprocessing for system and user messages. It should be similar to together's.
     def direct_preprocessing(self, input_text, system_info) -> str:
         if self.prompt_template == INSTRUCTION_INPUT_RESPONSE_PATTERN:
             instruction = system_info.strip() + " " + input_text if system_info else input_text
@@ -141,6 +170,7 @@ class LLMWrapper:
         else:
             raise NotImplementedError("Missing prompt template for used model")
 
+    # TODO: Add openai postprocessing for decoded output.
     def direct_postprocessing(self, decoded_output):
         if self.prompt_template == INSTRUCTION_INPUT_RESPONSE_PATTERN:
             output = decoded_output.split("### Response:")[1].strip().split("</s>")[0]
@@ -168,6 +198,11 @@ class LLMWrapper:
                 self.logger.log("messages in generate with self.use_together", messages)
                 final_output = self.generate_with_together_safely(messages, generation_parameters)  # max_new_tokens -> max_tokens
                 self.logger.log("final_output in generate with self.use_together", final_output)
+            elif self.use_openai:
+                messages = self.pipeline_preprocessing(input_text, system_info)
+                self.logger.log("messages in generate with self.use_openai", messages)
+                final_output = self.generate_with_openai_safely(messages, generation_parameters)
+                self.logger.log("final_output in generate with self.use_openai", outputs)
             elif self.use_pipeline:
                 messages = self.pipeline_preprocessing(input_text, system_info)
                 self.logger.log("messages in generate with self.use_pipeline", messages)
