@@ -12,7 +12,8 @@ options:
   -m MAFIA, --mafia MAFIA
                         number of mafia players in game
   -l {0,1}, --llm {0,1}
-                        number of LLM players in game, currently supports maximum 1
+                        number of LLM players in game, currently supports multiple LLM players,
+                        but the survey then doesn't quite work
   -b, --bystander       whether the LLM player can only be bystander (not mafia)
   -n NAMES_FILE, --names_file NAMES_FILE
                         path to file with the participating players' real
@@ -43,7 +44,7 @@ from game_constants import DEFAULT_CONFIG_DIR, DEFAULT_NUM_PLAYERS, DEFAULT_NUM_
     WARNING_LIMIT_NUM_MAFIA, PLAYERS_KEY_IN_CONFIG, DEFAULT_DAYTIME_MINUTES, \
     DEFAULT_NIGHTTIME_MINUTES, DAYTIME_MINUTES_KEY, NIGHTTIME_MINUTES_KEY
 from llm_players.llm_constants import INT_CONFIG_KEYS, FLOAT_CONFIG_KEYS, DEFAULT_LLM_CONFIG, \
-    LLM_CONFIG_KEYS_OPTIONS, BOOL_CONFIG_KEYS
+    LLM_CONFIG_KEYS_OPTIONS, BOOL_CONFIG_KEYS, OPENAI_LLM_CONFIG
 
 LLM_CONFIG_KEYS_INDEXED_OPTIONS = {
     key: {f"{i}": option for (i, option) in enumerate(options)}
@@ -69,7 +70,8 @@ def parse_args():
                         help="number of mafia players in game")
     parser.add_argument("-l", "--llm", type=int, default=1, # choices=[0, 1],
                         # Try to remove the choices argument to allow more than 1 LLM player
-                        help="number of LLM players in game, currently supports maximum 1")
+                        help="number of LLM players in game, supports multiple LLM players, \
+                              but the survey then doesn't quite work")
     parser.add_argument("-b", "--bystander", action="store_true",
                         help="whether the LLM player can only be bystander (not mafia)")
     parser.add_argument("-n", "--names_file", default=None,
@@ -145,7 +147,7 @@ def get_llm_config(llm_numbered_symbol, args):
         with open(args.llm_config_json_path, "r") as f:
             llm_config = json.load(f)
     else:
-        llm_config = DEFAULT_LLM_CONFIG.copy()  # pay attention it is shallow copy of primitives
+        llm_config = OPENAI_LLM_CONFIG.copy()  # pay attention it is shallow copy of primitives
     if args.change_llm_config:
         config_approved = False
         index2key = {f"{i}": key for i, key in enumerate(llm_config.keys())}

@@ -10,6 +10,8 @@ DEFAULT_MODEL_NAME = MODEL_NAMES[0]
 # prompts patterns:
 INSTRUCTION_INPUT_RESPONSE_PATTERN = "instruction-input-response prompt pattern"
 LLAMA3_PATTERN = "Llama 3 pattern"
+DEFAULT_PIPELINE_PROMPT_PATTERN = "default pipeline prompt pattern, \
+                                   which is based off OpenAI's pattern"
 DEFAULT_PROMPT_PATTERN = "default"
 
 # pipeline formats:

@@ -9,7 +9,7 @@ from llm_players.llm_constants import TASK2OUTPUT_FORMAT, INITIAL_GENERATION_PRO
     MODEL_NAME_KEY, USE_PIPELINE_KEY, PIPELINE_TASK_KEY, MAX_NEW_TOKENS_KEY, GENERAL_SYSTEM_INFO, \
     REPETITION_PENALTY_KEY, GENERATION_PARAMETERS, USE_TOGETHER_KEY, USE_OPENAI_KEY, TOGETHER_API_KEY_KEYWORD, \
     SECRETS_DICT_FILE_PATH, SLEEPING_TIME_FOR_API_GENERATION_ERROR, HUGGINGFACE_GENERATION_PARAMETERS, \
-    OPENAI_GENERATION_PARAMETERS, OPENAI_API_KEY_KEYWORD
+    OPENAI_GENERATION_PARAMETERS, OPENAI_API_KEY_KEYWORD, DEFAULT_PIPELINE_PROMPT_PATTERN
 
 print("Trying to import torch...", get_current_timestamp())
 import torch
@@ -95,8 +95,6 @@ class LLMWrapper:
             then the generation parameters are the HUGGINGFACE_GENERATION_PARAMETERS.
             
             I am assuming that pipeline is referring to the HuggingFace pipeline.
-            
-            TODO: Add support for openai models, which will have different generation parameters.
         '''
         if self.use_together:
             self.generation_parameters = {key: value for key, value in llm_config.items()
@@ -139,20 +137,22 @@ class LLMWrapper:
             return INSTRUCTION_INPUT_RESPONSE_PATTERN
         elif "llama-3" in model_name:
             return LLAMA3_PATTERN
+        elif self.use_openai is True:
+            return DEFAULT_PIPELINE_PROMPT_PATTERN # OpenAI newer models, the legacy models
+                                                   # e.g. text-davinci-003 are not implemented
+                                                   # and do not use this pattern.
         # elif "____" in model_name: return "____"
         else:
             return DEFAULT_PROMPT_PATTERN
 
-    # TODO: Check if I am supposed to use this method for OpenAI models, or direct_preprocessing.
     def pipeline_preprocessing(self, input_text, system_info):
-        if self.prompt_template in (INSTRUCTION_INPUT_RESPONSE_PATTERN, LLAMA3_PATTERN):
+        if self.prompt_template in (INSTRUCTION_INPUT_RESPONSE_PATTERN, LLAMA3_PATTERN, DEFAULT_PIPELINE_PROMPT_PATTERN):
             system_message = [{"role": "system", "content": system_info}] if system_info else []
             return system_message + [{"role": "user", "content": input_text}]
         else:
             raise NotImplementedError("Used model doesn't support pipeline, "
                                       "try `use_pipeline=False` in config")
 
-    # TODO: Add openai preprocessing for system and user messages. It should be similar to together's.
     def direct_preprocessing(self, input_text, system_info) -> str:
         if self.prompt_template == INSTRUCTION_INPUT_RESPONSE_PATTERN:
             instruction = system_info.strip() + " " + input_text if system_info else input_text
@@ -170,7 +170,6 @@ class LLMWrapper:
         else:
             raise NotImplementedError("Missing prompt template for used model")
 
-    # TODO: Add openai postprocessing for decoded output.
     def direct_postprocessing(self, decoded_output):
         if self.prompt_template == INSTRUCTION_INPUT_RESPONSE_PATTERN:
             output = decoded_output.split("### Response:")[1].strip().split("</s>")[0]
@@ -233,5 +232,21 @@ class LLMWrapper:
             except TogetherException as e:
                 print(f"TogetherException\n{e}")
                 self.logger.log("error generating with TogetherAI", str(e))
+                time.sleep(SLEEPING_TIME_FOR_API_GENERATION_ERROR)
+        return output
+
+    def generate_with_openai_safely(self, messages, generation_parameters):
+        output = None
+        while not output:
+            try:
+                response = self.client.completions.create(
+                    model=self.model_name,
+                    messages=messages,
+                    **generation_parameters
+                )
+                output = response.choices[0].message.content
+            except OpenAIError as e:
+                print(f"OpenAIError\n{e}")
+                self.logger.log("error generating with OpenAI", str(e))
                 time.sleep(SLEEPING_TIME_FOR_API_GENERATION_ERROR)
         return output
