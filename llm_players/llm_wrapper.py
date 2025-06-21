@@ -8,7 +8,7 @@ from llm_players.llm_constants import TASK2OUTPUT_FORMAT, INITIAL_GENERATION_PRO
     INSTRUCTION_INPUT_RESPONSE_PATTERN, LLAMA3_PATTERN, DEFAULT_PROMPT_PATTERN, NUM_BEAMS_KEY, \
     MODEL_NAME_KEY, USE_PIPELINE_KEY, PIPELINE_TASK_KEY, MAX_NEW_TOKENS_KEY, GENERAL_SYSTEM_INFO, \
     REPETITION_PENALTY_KEY, GENERATION_PARAMETERS, USE_TOGETHER_KEY, TOGETHER_API_KEY_KEYWORD, \
-    SECRETS_DICT_FILE_PATH, SLEEPING_TIME_FOR_API_GENERATION_ERROR
+    SECRETS_DICT_FILE_PATH, SLEEPING_TIME_FOR_API_GENERATION_ERROR, HUGGINGFACE_GENERATION_PARAMETERS
 
 print("Trying to import torch...", get_current_timestamp())
 import torch
@@ -70,8 +70,22 @@ class LLMWrapper:
         self.use_together = llm_config.get(USE_TOGETHER_KEY)
         self.use_pipeline = llm_config[USE_PIPELINE_KEY]
         self.pipeline_task = llm_config[PIPELINE_TASK_KEY]
-        self.generation_parameters = {key: value for key, value in llm_config.items()
-                                      if key in GENERATION_PARAMETERS}
+        '''
+            If using Together (use_together = true), then the generation parameters
+            are just the GENERATION_PARAMETERS. If you are using HuggingFace (use_pipeline = true),
+            then the generation parameters are the HUGGINGFACE_GENERATION_PARAMETERS.
+            
+            I am assuming that pipeline is referring to the HuggingFace pipeline.
+            
+            TODO: Add support for openai models, which will have different generation parameters.
+        '''
+        if self.use_together:
+            self.generation_parameters = {key: value for key, value in llm_config.items()
+                                          if key in GENERATION_PARAMETERS}
+        elif self.use_pipeline:
+            self.generation_parameters = {key: value for key, value in llm_config.items()
+                                          if key in HUGGINGFACE_GENERATION_PARAMETERS}
+            self.generation_parameters[MAX_NEW_TOKENS_KEY] = llm_config.get(MAX_NEW_TOKENS_KEY, 25)
         if (NUM_BEAMS_KEY in self.generation_parameters
             and self.generation_parameters[NUM_BEAMS_KEY] < 2):
             del self.generation_parameters[NUM_BEAMS_KEY]

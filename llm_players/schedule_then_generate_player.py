@@ -35,7 +35,7 @@ class ScheduleThenGeneratePlayer(LLMPlayer):
         self.logger.log("prompt in should_generate_message", prompt)
         decision = self.scheduler.generate(
             prompt, self.get_system_info_message(only_special_tokens=True),
-            SCHEDULING_GENERATION_PARAMETERS)
+            SCHEDULING_GENERATION_PARAMETERS if self.llm.use_together else None) # TODO: Change the None to open-ai specific parameters
         self.logger.log("decision in should_generate_message", decision)
         return self.interpret_scheduling_decision(decision)
 
