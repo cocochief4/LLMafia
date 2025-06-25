@@ -52,7 +52,7 @@ class ScheduleThenGeneratePlayer(LLMPlayer):
 
     def talkative_scheduling_prompt_modifier(self, message_history):
         if not message_history or is_nighttime(self.game_dir):
-            return ALT_TALKATIVE_PROMPT
+            return TALKATIVE_PROMPT
         all_players = (self.game_dir / REMAINING_PLAYERS_FILE).read_text().splitlines()
         players_counts = {player: 0 for player in all_players}
         for message in message_history[::-1]:

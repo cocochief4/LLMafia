@@ -6,6 +6,10 @@ from game_status_checks import is_nighttime, is_game_over, is_voted_out, is_time
 from llm_players.factory import llm_player_factory
 from llm_players.llm_constants import GAME_DIR_KEY, VOTING_WAITING_TIME, MAX_TIME_TO_WAIT
 
+# Wrap outpt from CP-1252 default to UTF-8
+import sys
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 OPERATOR_COLOR = "yellow"  # the person running this file is the "operator" of the model
 LLM_PLAYER_LOADED_MESSAGE = "The LLM PLayer was loaded successfully, " \

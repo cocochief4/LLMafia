@@ -9,7 +9,7 @@ from llm_players.llm_constants import TASK2OUTPUT_FORMAT, INITIAL_GENERATION_PRO
     MODEL_NAME_KEY, USE_PIPELINE_KEY, PIPELINE_TASK_KEY, MAX_NEW_TOKENS_KEY, GENERAL_SYSTEM_INFO, \
     REPETITION_PENALTY_KEY, GENERATION_PARAMETERS, USE_TOGETHER_KEY, USE_OPENAI_KEY, TOGETHER_API_KEY_KEYWORD, \
     SECRETS_DICT_FILE_PATH, SLEEPING_TIME_FOR_API_GENERATION_ERROR, HUGGINGFACE_GENERATION_PARAMETERS, \
-    OPENAI_GENERATION_PARAMETERS, OPENAI_API_KEY_KEYWORD, DEFAULT_PIPELINE_PROMPT_PATTERN
+    OPENAI_GENERATION_PARAMETERS, OPENAI_API_KEY_KEYWORD, DEFAULT_PIPELINE_PROMPT_PATTERN, MAX_TOKENS_KEY
 
 print("Trying to import torch...", get_current_timestamp())
 import torch
@@ -22,8 +22,7 @@ print("Finished importing from transformers!", get_current_timestamp())
 from together import Together
 from together.error import TogetherException
 
-from openai import OpenAI
-from openai import OpenAIError
+import openai
 
 CACHE_DIR = os.path.expanduser("~/.cache/huggingface/hub")
 
@@ -103,7 +102,7 @@ class LLMWrapper:
         elif self.use_openai:
             self.generation_parameters = {key: value for key, value in llm_config.items()
                                           if key in OPENAI_GENERATION_PARAMETERS}
-            self.generation_parameters[MAX_NEW_TOKENS_KEY] = llm_config.get(MAX_NEW_TOKENS_KEY, 25)
+            self.generation_parameters[MAX_TOKENS_KEY] = llm_config.get(MAX_TOKENS_KEY, 25)
         elif self.use_pipeline:
             self.generation_parameters = {key: value for key, value in llm_config.items()
                                           if key in HUGGINGFACE_GENERATION_PARAMETERS}
@@ -117,7 +116,7 @@ class LLMWrapper:
             self.client = Together(api_key=get_together_api_key())
             self.pipeline = self.tokenizer = self.model = None
         elif self.use_openai:
-            self.client = OpenAI(api_key=get_openai_api_key())
+            self.client = openai.OpenAI(api_key=get_openai_api_key())
             self.pipeline = self.tokenizer = self.model = None
         elif self.use_pipeline:
             self.pipeline = cached_pipeline(self.model_name, self.pipeline_task)
@@ -201,7 +200,7 @@ class LLMWrapper:
                 messages = self.pipeline_preprocessing(input_text, system_info)
                 self.logger.log("messages in generate with self.use_openai", messages)
                 final_output = self.generate_with_openai_safely(messages, generation_parameters)
-                self.logger.log("final_output in generate with self.use_openai", outputs)
+                self.logger.log("final_output in generate with self.use_openai", final_output)
             elif self.use_pipeline:
                 messages = self.pipeline_preprocessing(input_text, system_info)
                 self.logger.log("messages in generate with self.use_pipeline", messages)
@@ -239,13 +238,15 @@ class LLMWrapper:
         output = None
         while not output:
             try:
-                response = self.client.completions.create(
+                response = self.client.chat.completions.create(
                     model=self.model_name,
                     messages=messages,
-                    **generation_parameters
+                    # TODO: change the generation_parameters to be model specific;
+                    # 4o takes max_tokens, while o4-mini takes max_completion_tokens
+                    # **generation_parameters
                 )
                 output = response.choices[0].message.content
-            except OpenAIError as e:
+            except openai.OpenAIError as e:
                 print(f"OpenAIError\n{e}")
                 self.logger.log("error generating with OpenAI", str(e))
                 time.sleep(SLEEPING_TIME_FOR_API_GENERATION_ERROR)
