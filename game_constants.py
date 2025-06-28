@@ -8,7 +8,7 @@ from termcolor import colored
 
 # new game preparation constants
 # DEFAULT_GAME_CONFIG = "configurations/minimalist_game_with_llm.json"
-DEFAULT_GAME_CONFIG = "configurations/minimalist_game_no_llm.json"
+DEFAULT_GAME_CONFIG = "configurations/openai-5-4-1.json"
 GAME_ID_NUM_DIGITS = 4
 NOTES_FILE = "notes.txt"  # for our use, post-game
 

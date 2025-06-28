@@ -96,14 +96,15 @@ def add_message_to_game(player, message_history):
         return  # sometimes the messages is generated when it's already too late, so drop it
     if message:
         # artificially making the model taking time to write the message
-        wait_writing_time(player, message)
+        # wait_writing_time(player, message) # Already is slower than a normal player, so no need to wait
         if is_nighttime(game_dir) != is_nighttime_at_start:
             return  # waited for too long
         with open(game_dir / PERSONAL_CHAT_FILE_FORMAT.format(player.name), "a") as f:
             f.write(format_message(player.name, message))
-        print(colored(MODEL_CHOSE_TO_USE_TURN_LOG, OPERATOR_COLOR))
+        print(colored(MODEL_CHOSE_TO_USE_TURN_LOG, OPERATOR_COLOR), flush = True)
     else:
-        print(colored(MODEL_CHOSE_TO_PASS_TURN_LOG, OPERATOR_COLOR))
+        # print(colored(MODEL_CHOSE_TO_PASS_TURN_LOG, OPERATOR_COLOR)) # Assumed that the model is passing its turn.
+        return
 
 
 def end_game():
@@ -112,7 +113,7 @@ def end_game():
 
 def main():
     player = get_llm_player()
-    print(colored(LLM_PLAYER_LOADED_MESSAGE, OPERATOR_COLOR))
+    print(colored(LLM_PLAYER_LOADED_MESSAGE, OPERATOR_COLOR), flush=True)
     while not all_players_joined(game_dir):
         continue
     print(colored(ALL_PLAYERS_JOINED_MESSAGE, OPERATOR_COLOR))

@@ -228,8 +228,8 @@ def run_daytime(players, daytime_minutes):
 
 def wait_for_players(players):
     havent_joined_yet = [player for player in players]
-    print("Waiting for all players to connect and start running their programs to join:")
-    print(",  ".join([player.name for player in havent_joined_yet]))
+    print(colored("Waiting for all players to connect and start running their programs to join:", "yellow"))
+    print(colored(",  ".join([player.name for player in havent_joined_yet]), "yellow"))
     while havent_joined_yet:
         joined = []
         for player in havent_joined_yet:
