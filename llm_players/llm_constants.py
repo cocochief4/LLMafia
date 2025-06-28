@@ -115,7 +115,7 @@ DEFAULT_LLM_CONFIG = {
 }
 
 OPENAI_LLM_CONFIG = {
-    MODEL_NAME_KEY: 'o4-mini-high', # or use 'o4-mini-high'
+    MODEL_NAME_KEY: 'o4-mini', # no access to 'o4-mini-high', use 'o4-mini'
     USE_TOGETHER_KEY: False,  # OpenAI does not use Together
     USE_PIPELINE_KEY: False,  # OpenAI does not use pipelines
     USE_OPENAI_KEY: True,  # OpenAI specific

@@ -7,6 +7,8 @@ from llm_players.llm_constants import turn_task_into_prompt, GENERAL_SYSTEM_INFO
 from llm_players.llm_wrapper import LLMWrapper
 from llm_players.logger import Logger
 
+from llm.llm import * # cocochief's implementation
+
 
 class LLMPlayer(ABC):
 
@@ -21,7 +23,9 @@ class LLMPlayer(ABC):
         self.pass_turn_token = llm_config[PASS_TURN_TOKEN_KEY]
         self.use_turn_token = llm_config[USE_TURN_TOKEN_KEY]
         self.num_words_per_second_to_wait = llm_config[WORDS_PER_SECOND_WAITING_KEY]
-        self.llm = LLMWrapper(self.logger, **llm_config)
+        # self.llm = LLMWrapper(self.logger, **llm_config)
+        print("creating llm...")
+        self.llm = create_llm(self.logger, **llm_config)
 
     def get_system_info_message(self, attention_to_not_repeat=False, only_special_tokens=False):
         system_info = f"Your name is {self.name}. {GENERAL_SYSTEM_INFO}\n" \
