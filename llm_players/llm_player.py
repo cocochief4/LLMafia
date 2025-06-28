@@ -1,6 +1,7 @@
+import json
 import re
 from abc import ABC, abstractmethod
-from game_constants import get_role_string, GAME_START_TIME_FILE, PERSONAL_CHAT_FILE_FORMAT, \
+from game_constants import GAME_CONFIG_FILE, PLAYERS_KEY_IN_CONFIG, get_role_string, GAME_START_TIME_FILE, PERSONAL_CHAT_FILE_FORMAT, \
     MESSAGE_PARSING_PATTERN, SCHEDULING_DECISION_LOG, MODEL_CHOSE_TO_USE_TURN_LOG, MODEL_CHOSE_TO_PASS_TURN_LOG
 from llm_players.llm_constants import turn_task_into_prompt, GENERAL_SYSTEM_INFO, \
     PASS_TURN_TOKEN_KEY, USE_TURN_TOKEN_KEY, WORDS_PER_SECOND_WAITING_KEY, PASS_TURN_TOKEN_OPTIONS
@@ -24,7 +25,7 @@ class LLMPlayer(ABC):
         self.use_turn_token = llm_config[USE_TURN_TOKEN_KEY]
         self.num_words_per_second_to_wait = llm_config[WORDS_PER_SECOND_WAITING_KEY]
         # self.llm = LLMWrapper(self.logger, **llm_config)
-        print("creating llm...")
+        # print("creating llm...")
         self.llm = create_llm(self.logger, **llm_config)
 
     def get_system_info_message(self, attention_to_not_repeat=False, only_special_tokens=False):
@@ -33,6 +34,25 @@ class LLMPlayer(ABC):
         chat_room_open_time = (self.game_dir / GAME_START_TIME_FILE).read_text().strip()
         if chat_room_open_time:  # if the game has started, the file isn't empty
             system_info += f"The game's chat room was open at [{chat_room_open_time}].\n"
+            system_info += f"The other players in the game are:\n"
+            with open (self.game_dir / GAME_CONFIG_FILE, "r") as f:
+                config = json.load(f)
+                players = (self.game_dir / "player_names.txt").read_text().splitlines()
+                remaining_players = (self.game_dir / "remaining_players.txt").read_text().splitlines()
+                i = -1
+                for player in players:
+                    i += 1
+                    if player != self.name:
+                        # reveal the role only if the self player is a mafia or the player is dead
+                        system_info += f"* {player} " + ("(" + get_role_string(config[PLAYERS_KEY_IN_CONFIG][i]['is_mafia']) + ")") if self.is_mafia \
+                                                                        or player not in remaining_players else "" + "\n"
+                system_info += f"The other players that have not been eliminated yet are:\n"
+                i = -1
+                for player in remaining_players:
+                    i += 1
+                    if player != self.name:
+                        system_info += f"* {player} " + ("(" + get_role_string(config[PLAYERS_KEY_IN_CONFIG][i]['is_mafia']) + ")") if self.is_mafia \
+                                                                                                   else "" + "\n"
         if attention_to_not_repeat:
             # system_info += "Note: Do not repeat any messages already present in the message history below!\n"
             system_info += "IMPORTANT RULES FOR RESPONSES:\n" \

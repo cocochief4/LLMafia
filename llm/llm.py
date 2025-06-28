@@ -69,7 +69,7 @@ class LLM(abc.ABC):
         self._setup_generation_parameters()
         self._initialize()
         # Warm-up
-        print("warm-up")
+        # print("warm-up")
         self.generate(INITIAL_GENERATION_PROMPT, system_info=GENERAL_SYSTEM_INFO)
 
     def _get_prompt_template(self):

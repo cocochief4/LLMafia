@@ -6,7 +6,7 @@
             "is_llm": true,
             "real_name": "LLM1",
             "llm_config": {
-                "model_name": "o4-mini-high",
+                "model_name": "o4-mini",
                 "use_together": false,
                 "use_pipeline": false,
                 "use_openai": true,
@@ -30,7 +30,7 @@
             "is_llm": true,
             "real_name": "LLM0",
             "llm_config": {
-                "model_name": "o4-mini-high",
+                "model_name": "o4-mini",
                 "use_together": false,
                 "use_pipeline": false,
                 "use_openai": true,

@@ -44,7 +44,7 @@ class ScheduleThenGeneratePlayer(LLMPlayer):
             prompt = self.create_generation_prompt(message_history)
             self.logger.log("prompt in generate_message", prompt)
             message = self.llm.generate(
-                prompt, self.get_system_info_message(attention_to_not_repeat=True))
+                prompt, self.get_system_info_message(attention_to_not_repeat=False))
             message = make_more_human_like(message)
             return message
         else:
