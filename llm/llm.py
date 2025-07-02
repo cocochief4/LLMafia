@@ -69,8 +69,9 @@ class LLM(abc.ABC):
         self._setup_generation_parameters()
         self._initialize()
         # Warm-up
-        # print("warm-up")
+        print("warm-up", flush=True)
         self.generate(INITIAL_GENERATION_PROMPT, system_info=GENERAL_SYSTEM_INFO)
+        print("warm-up done", flush=True)
 
     def _get_prompt_template(self):
         name = self.model_name.lower()
@@ -101,7 +102,8 @@ class LLM(abc.ABC):
         messages = self.pipeline_preprocessing(input_text, system_info)
         self.logger.log("Pipeline messages", messages)
         raw = self._call_llm(messages)
-        return self.postprocess_pipeline(raw)
+        return raw
+        # return self.postprocess_pipeline(raw)
         # else:
         """  prompt = self.direct_preprocessing(input_text, system_info)
         self.logger.log("Direct prompt", prompt)
@@ -260,6 +262,99 @@ class OpenAILLM(LLM):
             return self.tokenizer.decode(outputs[0], skip_special_tokens=False) 
     """
 
+class OpenAI_4o(LLM):
+    def _initialize(self):
+        openai.api_key = get_api_key(OPENAI_API_KEY_KEYWORD, OPENAI_API_KEY_KEYWORD)
+        self.client = openai
+        self.pipeline = True
+
+    def _setup_generation_parameters(self):
+        self.generation_parameters = {
+            k: self.llm_config[k]
+            for k in OPENAI_GENERATION_PARAMETERS
+            if k in self.llm_config
+        }
+        self.generation_parameters[MAX_TOKENS_KEY] = self.llm_config.get(MAX_TOKENS_KEY, 25)
+   
+    def _call_llm(self, messages):
+        output = None
+        while not output:
+            try:
+                resp = self.client.chat.completions.create(
+                    model=self.model_name,
+                    messages=messages,
+                    # **self.generation_parameters, # commented out for now because different for generation parameters for different models
+                )
+                output = resp.choices[0].message.content
+            except openai.OpenAIError as e:
+                print(e, flush=True)
+                time.sleep(SLEEPING_TIME_FOR_API_GENERATION_ERROR)
+        return output
+
+
+class OpenAI_o4_mini(LLM):
+    REASONING_PROMPT = " \n To perform your role to the best of your ability, you have been given a \n" \
+    " hidden sctrachpad where you can perform step-by-step reasoning." \
+    " Anything written down in this scratchpad will not be shown as output to the end user." \
+    " Utilize this to think before you respond.\n" \
+    " 1. Perform your step-by-step reasoning inside a hidden scratchpad, which will be delimited by <<< and >>>. \n" \
+    " 3. Immediately after the closing >>>, anything that you write (including leading newlines and spaces) " \
+    " will be part of your output response. \n" \
+
+    def _initialize(self):
+        openai.api_key = get_api_key(OPENAI_API_KEY_KEYWORD, OPENAI_API_KEY_KEYWORD)
+        self.client = openai
+        self.pipeline = True
+
+    def _setup_generation_parameters(self):
+        self.generation_parameters = {
+            k: self.llm_config[k]
+            for k in OPENAI_GENERATION_PARAMETERS
+            if k in self.llm_config
+        }
+        self.generation_parameters[MAX_TOKENS_KEY] = self.llm_config.get(MAX_TOKENS_KEY, 25)
+   
+    # o4-mini specific preprocessing
+    def pipeline_preprocessing(self, input_text: str, system_info: str):
+            system_info += self.REASONING_PROMPT
+            system_msg = [{"role": "system", "content": system_info}] if system_info else []
+            return system_msg + [{"role": "user", "content": input_text}]
+    
+    # Must remove the hidden scratchpad from the end output.
+    def postprocess_pipeline(self, response):
+        # Assuming response is an OpenAI response object
+        # Separate the output from the reasoning scratchpad and return both
+
+        raw_output = response
+        reasoning = raw_output.split("<<<")[1].split(">>>")[0].strip() if "<<<" in raw_output and ">>>" in raw_output else ""
+        if reasoning == "":
+            reasoning = "No reasoning provided."
+
+        output = raw_output.split(">>>")[-1].strip() if ">>>" in raw_output else raw_output.strip()
+
+        return \
+            {
+            "reasoning": reasoning,
+            "output": output,
+            }
+
+    def _call_llm(self, messages):
+        raw_output = None
+        while not raw_output:
+            try:
+                resp = self.client.chat.completions.create(
+                    model=self.model_name,
+                    messages=messages,
+                    # **self.generation_parameters, # commented out for now because different for generation parameters for different models
+                )
+                raw_output = self.postprocess_pipeline(resp.choices[0].message.content)
+                self.logger.log("Reasoning in decision", raw_output["reasoning"])
+                self.logger.log("Output", raw_output["output"])
+                self.logger.log("raw response", resp.choices[0].message.content)
+            except openai.OpenAIError as e:
+                print(e, flush=True)
+                time.sleep(SLEEPING_TIME_FOR_API_GENERATION_ERROR)
+        return raw_output["output"]
 
 # Factory
 
@@ -267,7 +362,7 @@ def create_llm(logger, **llm_config):
     if llm_config.get(USE_TOGETHER_KEY):
         return TogetherLLM(logger, **llm_config)
     if llm_config.get(USE_OPENAI_KEY):
-        return OpenAILLM(logger, **llm_config)
+        return OpenAI_o4_mini(logger, **llm_config)
     if llm_config.get(USE_PIPELINE_KEY):
         # return LLM.PipelineLLM(logger, **llm_config)
         raise NotImplementedError("Pipeline LLM is not implemented yet.")

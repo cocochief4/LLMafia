@@ -25,7 +25,7 @@ class LLMPlayer(ABC):
         self.use_turn_token = llm_config[USE_TURN_TOKEN_KEY]
         self.num_words_per_second_to_wait = llm_config[WORDS_PER_SECOND_WAITING_KEY]
         # self.llm = LLMWrapper(self.logger, **llm_config)
-        # print("creating llm...")
+        print("creating llm...", flush=True)
         self.llm = create_llm(self.logger, **llm_config)
 
     def get_system_info_message(self, attention_to_not_repeat=False, only_special_tokens=False):
@@ -78,7 +78,9 @@ class LLMPlayer(ABC):
                     message_content = matcher.group(5)  # depends on MESSAGE_PARSING_PATTERN
                     system_info += f"* \"{message_content}\"\n"
         if only_special_tokens:
-            system_info += f"You can ONLY respond with one of two possible outputs:\n" \
+                            # First line to try and prevent conflict with o4-mini hidden scratchpad.
+            system_info += f"In your response to that is shown to the user (excluding your hidden scratchpad), " \
+                           f"you can ONLY respond with one of two possible outputs:\n" \
                            f"{self.pass_turn_token} - indicating your character in the game " \
                            f"should wait and not send a message in the current timing;\n" \
                            f"{self.use_turn_token} - indicating your character in the game should " \
