@@ -338,23 +338,32 @@ class OpenAI_o4_mini(LLM):
             "output": output,
             }
 
-    def _call_llm(self, messages):
-        raw_output = None
-        while not raw_output:
+    def _call_llm(self, messages) -> str:
+        output = None
+        while not output:
             try:
                 resp = self.client.chat.completions.create(
                     model=self.model_name,
                     messages=messages,
                     # **self.generation_parameters, # commented out for now because different for generation parameters for different models
                 )
-                raw_output = self.postprocess_pipeline(resp.choices[0].message.content)
-                self.logger.log("Reasoning in decision", raw_output["reasoning"])
-                self.logger.log("Output", raw_output["output"])
-                self.logger.log("raw response", resp.choices[0].message.content)
+                output = resp.choices[0].message.content
+                self.logger.log("Raw LLM Output", output)
             except openai.OpenAIError as e:
                 print(e, flush=True)
                 time.sleep(SLEEPING_TIME_FOR_API_GENERATION_ERROR)
-        return raw_output["output"]
+        return output
+    
+    def generate(self, input_text: str, system_info: str = "") -> str:
+        messages = self.pipeline_preprocessing(input_text, system_info)
+        self.logger.log("Pipeline messages - System", messages[0]["content"])
+        self.logger.log("Pipeline messages - User", messages[1]["content"])
+        raw = self._call_llm(messages)
+        processed_output = self.postprocess_pipeline(raw)
+        self.logger.log("Reasoning behind Output", processed_output["reasoning"])
+        self.logger.log("Output to User", processed_output["output"])
+        
+        return processed_output["output"]
 
 # Factory
 

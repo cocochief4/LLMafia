@@ -29,8 +29,8 @@ class LLMPlayer(ABC):
         self.llm = create_llm(self.logger, **llm_config)
 
     def get_system_info_message(self, attention_to_not_repeat=False, only_special_tokens=False):
-        system_info = f"Your name is {self.name}. {GENERAL_SYSTEM_INFO}\n" \
-                      f"You were assigned the following role: {self.role}.\n"
+        system_info = f"Your name is {self.name}.{GENERAL_SYSTEM_INFO} \n" \
+                      f"You were assigned the following role: {self.role}. \n"
         chat_room_open_time = (self.game_dir / GAME_START_TIME_FILE).read_text().strip()
         if chat_room_open_time:  # if the game has started, the file isn't empty
             system_info += f"The game's chat room was open at [{chat_room_open_time}].\n"
@@ -44,14 +44,14 @@ class LLMPlayer(ABC):
                     i += 1
                     if player != self.name:
                         # reveal the role only if the self player is a mafia or the player is dead
-                        system_info += f"* {player} " + ("(" + get_role_string(config[PLAYERS_KEY_IN_CONFIG][i]['is_mafia']) + ")") if self.is_mafia \
+                        system_info += f" {player} " + ("(" + get_role_string(config[PLAYERS_KEY_IN_CONFIG][i]['is_mafia']) + ")") if self.is_mafia \
                                                                         or player not in remaining_players else "" + "\n"
                 system_info += f"The other players that have not been eliminated yet are:\n"
                 i = -1
                 for player in remaining_players:
                     i += 1
                     if player != self.name:
-                        system_info += f"* {player} " + ("(" + get_role_string(config[PLAYERS_KEY_IN_CONFIG][i]['is_mafia']) + ")") if self.is_mafia \
+                        system_info += f" {player} " + ("(" + get_role_string(config[PLAYERS_KEY_IN_CONFIG][i]['is_mafia']) + ")") if self.is_mafia \
                                                                                                    else "" + "\n"
         if attention_to_not_repeat:
             # system_info += "Note: Do not repeat any messages already present in the message history below!\n"
