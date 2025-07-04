@@ -2,6 +2,10 @@ import json
 import os
 from game_constants import *  # incl. argparse, time, Path (from pathlib), colored (from termcolor)
 
+# Wrap outpt from CP-1252 default to UTF-8
+import sys
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # global variable for the game dir
 game_dir = Path()  # will be updated only if __name__ == __main__ (prevents new ones in imports)
@@ -138,7 +142,7 @@ def is_game_over(players):
 def run_chat_round_between_players(players, chat_room):
     for player in players:
         lines = player.get_new_messages()
-        with open(chat_room, "a") as f:
+        with open(chat_room, "a", encoding='utf-8') as f:
             f.writelines(lines)  # lines already include "\n"
 
 
@@ -147,7 +151,7 @@ def notify_players_about_voting_time(phase_name, public_chat_file):
     with open(public_chat_file, "a") as f:  # only to the current phase's active players chat room
         f.write(format_message(GAME_MANAGER_NAME, phase_end_message))
     voting_phase_name = DAYTIME_VOTING_TIME if phase_name == DAYTIME else NIGHTTIME_VOTING_TIME
-    (game_dir / PHASE_STATUS_FILE).write_text(voting_phase_name)
+    (game_dir / PHASE_STATUS_FILE).write_text(voting_phase_name, encoding='utf-8')
 
 
 def get_voted_out_name(optional_votes_players, public_chat_file, voting_players):
@@ -193,7 +197,7 @@ def game_manager_announcement(message):
 def announce_voted_out_player(voted_out_player):
     role = get_role_string(voted_out_player.is_mafia)
     # find the number of mafia players remaining
-    mafia_players = [player for player in (game_dir / REMAINING_PLAYERS_FILE).read_text().splitlines() if player in (game_dir / MAFIA_NAMES_FILE).read_text().contains(player)]
+    mafia_players = [player for player in (game_dir / REMAINING_PLAYERS_FILE).read_text().splitlines() if player in (game_dir / MAFIA_NAMES_FILE).read_text()]
     voted_out_message = VOTED_OUT_MESSAGE_FORMAT.format(voted_out_player.name, role, len(mafia_players))
     game_manager_announcement(voted_out_message)
 
@@ -206,7 +210,7 @@ def run_phase(players, voting_players, optional_votes_players, public_chat_file,
             run_chat_round_between_players(voting_players, public_chat_file)
     else:
         game_manager_announcement(CUTTING_TO_VOTE_MESSAGE)
-    print("Now voting starts...")
+    print("Now voting starts...", flush=True)
     voting_sub_phase(phase_name, voting_players, optional_votes_players, public_chat_file, players)
 
 
@@ -230,8 +234,8 @@ def run_daytime(players, daytime_minutes):
 
 def wait_for_players(players):
     havent_joined_yet = [player for player in players]
-    print(colored("Waiting for all players to connect and start running their programs to join:", "yellow"))
-    print(colored(",  ".join([player.name for player in havent_joined_yet]), "yellow"))
+    print(colored("Waiting for all players to connect and start running their programs to join:", "yellow"), flush=True)
+    print(colored(",  ".join([player.name for player in havent_joined_yet]), "yellow"), flush=True)
     while havent_joined_yet:
         joined = []
         for player in havent_joined_yet:
@@ -241,7 +245,7 @@ def wait_for_players(players):
         for player in joined:
             havent_joined_yet.remove(player)
     (game_dir / GAME_START_TIME_FILE).write_text(get_current_timestamp())
-    print("Game is now running! Its content is displayed to players.")
+    print("Game is now running! Its content is displayed to players.", flush=True)
 
 
 def get_all_player_out_of_voting_time():
@@ -251,7 +255,7 @@ def get_all_player_out_of_voting_time():
 
 def end_game():
     get_all_player_out_of_voting_time()
-    print("Game has finished.")
+    print("Game has finished.", flush=True)
 
 
 def main():

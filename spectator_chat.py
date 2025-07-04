@@ -14,7 +14,7 @@ def introducing_mafia_members(game_dir, is_mafia):
         start = ONLY_ONE_MAFIA_MESSAGE_START
         bold = ONLY_ONE_MAFIA_MESSAGE_BOLD
         end = ONLY_ONE_MAFIA_MESSAGE_END
-        introduce_other_mafia = False
+        introduce_other_mafia = True
     print(colored(start, MANAGER_COLOR), colored(bold, MANAGER_COLOR, attrs=["bold", "underline"]),
           colored(end, MANAGER_COLOR))
     if introduce_other_mafia:

@@ -316,12 +316,49 @@ class OpenAI_o4_mini(LLM):
    
     # o4-mini specific preprocessing
     def pipeline_preprocessing(self, input_text: str, system_info: str):
+        input_msg = f"{system_info} + \n + {input_text} + \n"
+        reasoning_msg = {"effort" : "medium", 
+                         "summary" : "detailed"}
+        return \
+            { 
+            "input": input_msg,
+            "reasoning": reasoning_msg,
+            }
+    
+    def postprocess_pipeline(self, response):
+        # Assuming response is an OpenAI response object
+        # Separate the output from the reasoning scratchpad and return both
+
+        reasoning = response.output[0].summary
+        content = response.output[1].content
+
+        if reasoning == []:
+            reasoning = "No reasoning provided."
+        else:
+            reasoning_output = ""
+            for r in reasoning:
+                reasoning_output += r.text.strip() + "\n"
+            
+        if content == []:
+            content = "No output provided."
+        else:
+            content = content[0].text.strip()
+
+        return \
+            {
+            "reasoning": reasoning,
+            "output": content,
+            }
+    
+    # General preprocessing format for most LLMs, should follow something similar.
+    """ def pipeline_preprocessing(self, input_text: str, system_info: str):
             system_info += self.REASONING_PROMPT
             system_msg = [{"role": "system", "content": system_info}] if system_info else []
-            return system_msg + [{"role": "user", "content": input_text}]
+            return system_msg + [{"role": "user", "content": input_text}] """
     
     # Must remove the hidden scratchpad from the end output.
-    def postprocess_pipeline(self, response):
+    # General preprocessing format for most LLMs
+    """ def postprocess_pipeline(self, response):
         # Assuming response is an OpenAI response object
         # Separate the output from the reasoning scratchpad and return both
 
@@ -336,28 +373,29 @@ class OpenAI_o4_mini(LLM):
             {
             "reasoning": reasoning,
             "output": output,
-            }
+            } """
 
     def _call_llm(self, messages) -> str:
         output = None
         while not output:
             try:
-                resp = self.client.chat.completions.create(
+                resp = self.client.responses.create(
                     model=self.model_name,
-                    messages=messages,
+                    input=messages["input"],
+                    reasoning=messages["reasoning"],
                     # **self.generation_parameters, # commented out for now because different for generation parameters for different models
                 )
-                output = resp.choices[0].message.content
+                output = resp.model_dump_json(indent=2)
                 self.logger.log("Raw LLM Output", output)
             except openai.OpenAIError as e:
                 print(e, flush=True)
                 time.sleep(SLEEPING_TIME_FOR_API_GENERATION_ERROR)
-        return output
+        return resp
     
     def generate(self, input_text: str, system_info: str = "") -> str:
         messages = self.pipeline_preprocessing(input_text, system_info)
-        self.logger.log("Pipeline messages - System", messages[0]["content"])
-        self.logger.log("Pipeline messages - User", messages[1]["content"])
+        """ self.logger.log("Pipeline messages - System", messages[0]["content"])
+        self.logger.log("Pipeline messages - User", messages[1]["content"]) """
         raw = self._call_llm(messages)
         processed_output = self.postprocess_pipeline(raw)
         self.logger.log("Reasoning behind Output", processed_output["reasoning"])
