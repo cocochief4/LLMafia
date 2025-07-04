@@ -192,7 +192,9 @@ def game_manager_announcement(message):
 
 def announce_voted_out_player(voted_out_player):
     role = get_role_string(voted_out_player.is_mafia)
-    voted_out_message = VOTED_OUT_MESSAGE_FORMAT.format(voted_out_player.name, role)
+    # find the number of mafia players remaining
+    mafia_players = [player for player in (game_dir / REMAINING_PLAYERS_FILE).read_text().splitlines() if player in (game_dir / MAFIA_NAMES_FILE).read_text().contains(player)]
+    voted_out_message = VOTED_OUT_MESSAGE_FORMAT.format(voted_out_player.name, role, len(mafia_players))
     game_manager_announcement(voted_out_message)
 
 

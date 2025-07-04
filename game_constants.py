@@ -61,7 +61,7 @@ TIME_FORMAT_FOR_TIMESTAMP = "%H:%M:%S"
 MESSAGE_FORMAT = "[{timestamp}] {name}: {message}"
 MESSAGE_PARSING_PATTERN = r"\[(\d\d):(\d\d):(\d\d)\] ([^:]+): (.+)"  # depends on MESSAGE_FORMAT
 VOTING_MESSAGE_FORMAT = "{} voted for {}"
-VOTED_OUT_MESSAGE_FORMAT = "{} was voted out. Their role was {}"
+VOTED_OUT_MESSAGE_FORMAT = "{} was voted out. Their role was {}. There are now {} mafia players left."
 REAL_NAME_CODENAME_DELIMITER = ": "  # <real name>: <codename>
 
 # game constants
@@ -191,11 +191,21 @@ def strip_special_chars(content):
 def get_role_string(is_mafia):
     return MAFIA_ROLE if is_mafia else BYSTANDER_ROLE
 
+def get_latest_game_id():
+    all_game_dirs = Path(DIRS_PREFIX).glob("*")
+    number_game_dirs = [int(game.name) for game in all_game_dirs if game.name.isdigit()]
+    number_game_dirs.append(0)  # for robustness and for first time
+    next_id = max(number_game_dirs)
+    return f"{next_id}".zfill(GAME_ID_NUM_DIGITS)
 
 def get_game_dir_from_argv():
     parser = argparse.ArgumentParser()
     parser.add_argument("game_id", help=f"{GAME_ID_NUM_DIGITS}-digit game ID")
     args = parser.parse_args()
+    # Handle game_id
+    if not args.game_id:
+        args.game_id = get_latest_game_id()
+        print(colored(f"(!) No game ID provided, using the latest game ID: {args.game_id}", MANAGER_COLOR))
     game_dir = Path(DIRS_PREFIX) / args.game_id
     if not game_dir.exists():
         raise ValueError(f"The provided game ID {args.game_id} doesn't belong to a configured game")

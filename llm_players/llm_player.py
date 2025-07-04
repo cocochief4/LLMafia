@@ -45,14 +45,14 @@ class LLMPlayer(ABC):
                     if player != self.name:
                         # reveal the role only if the self player is a mafia or the player is dead
                         system_info += f" {player} " + ("(" + get_role_string(config[PLAYERS_KEY_IN_CONFIG][i]['is_mafia']) + ")" if self.is_mafia \
-                                                                        or player not in remaining_players else "") + "\n"
-                system_info += f"The other players that have not been eliminated yet are:\n"
+                                                                        or player not in remaining_players else "unknown") + "\n"
+                system_info += f"The other players that have not been eliminated (lynched or killed) yet are:\n"
                 i = -1
                 for player in remaining_players:
                     i += 1
                     if player != self.name:
                         system_info += f" {player} " + ("(" + get_role_string(config[PLAYERS_KEY_IN_CONFIG][i]['is_mafia']) + ")" if self.is_mafia \
-                                                                                                   else "") + "\n"
+                                                                                                   else "unknown") + "\n"
         if attention_to_not_repeat:
             # system_info += "Note: Do not repeat any messages already present in the message history below!\n"
             system_info += "IMPORTANT RULES FOR RESPONSES:\n" \
