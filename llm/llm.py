@@ -293,11 +293,11 @@ class OpenAI_4o(LLM):
 
 
 class OpenAI_o4_mini(LLM):
-    REASONING_PROMPT = " \n To perform your role to the best of your ability, you have been given a \n" \
-    " hidden sctrachpad where you can perform step-by-step reasoning." \
+    REASONING_PROMPT = " \n To perform your role to the best of your ability, let's think about your response step-by-step. You have been given a " \
+    " hidden sctrachpad where you can detail your steps / reasoning behind your response." \
     " Anything written down in this scratchpad will not be shown as output to the end user." \
-    " Utilize this to think before you respond.\n" \
-    " 1. Perform your step-by-step reasoning inside a hidden scratchpad, which will be delimited by <<< and >>>. \n" \
+    " Use this scratchpad to think about your response, and then write your final response. \n" \
+    " 1. demonstrate your reasoning inside a hidden scratchpad, which will be delimited by <<< and >>>. \n" \
     " 3. Immediately after the closing >>>, anything that you write (including leading newlines and spaces) " \
     " will be part of your output response. \n" \
 
