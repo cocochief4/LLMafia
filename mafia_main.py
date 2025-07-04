@@ -42,7 +42,7 @@ class Player:
         self.personal_status_file = game_dir / PERSONAL_STATUS_FILE_FORMAT.format(self.name)
 
     def get_new_messages(self):
-        with open(self.personal_chat_file, "r") as f:
+        with open(self.personal_chat_file, "r", encoding='utf-8') as f:
             # the readlines method includes the "\n"
             lines = f.readlines()[self.personal_chat_file_lines_read:]
         self.personal_chat_file_lines_read += len(lines)
@@ -148,7 +148,7 @@ def run_chat_round_between_players(players, chat_room):
 
 def notify_players_about_voting_time(phase_name, public_chat_file):
     phase_end_message = DAYTIME_VOTING_TIME_MESSAGE if phase_name == DAYTIME else NIGHTTIME_VOTING_TIME_MESSAGE
-    with open(public_chat_file, "a") as f:  # only to the current phase's active players chat room
+    with open(public_chat_file, "a", encoding='utf-8') as f:  # only to the current phase's active players chat room
         f.write(format_message(GAME_MANAGER_NAME, phase_end_message))
     voting_phase_name = DAYTIME_VOTING_TIME if phase_name == DAYTIME else NIGHTTIME_VOTING_TIME
     (game_dir / PHASE_STATUS_FILE).write_text(voting_phase_name, encoding='utf-8')
@@ -164,7 +164,7 @@ def get_voted_out_name(optional_votes_players, public_chat_file, voting_players)
                 continue
             voted_players.append(player)
             if voted_for in votes:
-                with open(public_chat_file, "a") as f:
+                with open(public_chat_file, "a", encoding='utf-8') as f:
                     voting_message = VOTING_MESSAGE_FORMAT.format(player.name, voted_for)
                     f.write(format_message(GAME_MANAGER_NAME, voting_message))
                 votes[voted_for] += 1
@@ -190,7 +190,7 @@ def voting_sub_phase(phase_name, voting_players, optional_votes_players, public_
 
 
 def game_manager_announcement(message):
-    with open(game_dir / PUBLIC_MANAGER_CHAT_FILE, "a") as f:
+    with open(game_dir / PUBLIC_MANAGER_CHAT_FILE, "a", encoding='utf-8') as f:
         f.write(format_message(GAME_MANAGER_NAME, message))
 
 

@@ -47,7 +47,7 @@ def get_llm_player():
 
 
 def read_messages_from_file(message_history, file_name, num_read_lines):
-    with open(game_dir / file_name, "r") as f:
+    with open(game_dir / file_name, "r", encoding='utf-8') as f:
         lines = f.readlines()[num_read_lines:]
     message_history.extend(lines)
     return len(lines)
@@ -82,7 +82,7 @@ def get_vote_from_llm(player, message_history):
 
 def update_vote(voted_name, player):
     time.sleep(VOTING_WAITING_TIME)
-    with open(game_dir / PERSONAL_VOTE_FILE_FORMAT.format(player.name), "a") as f:
+    with open(game_dir / PERSONAL_VOTE_FILE_FORMAT.format(player.name), "a", encoding='utf-8') as f:
         f.write(voted_name + "\n")
     print(colored(LLM_VOTE_MESSAGE_FORMAT.format(voted_name), OPERATOR_COLOR))
 
@@ -99,7 +99,7 @@ def add_message_to_game(player, message_history):
         # wait_writing_time(player, message) # Already is slower than a normal player, so no need to wait
         if is_nighttime(game_dir) != is_nighttime_at_start:
             return  # waited for too long
-        with open(game_dir / PERSONAL_CHAT_FILE_FORMAT.format(player.name), "a") as f:
+        with open(game_dir / PERSONAL_CHAT_FILE_FORMAT.format(player.name), "a", encoding='utf-8') as f:
             f.write(format_message(player.name, message))
         print(colored(MODEL_CHOSE_TO_USE_TURN_LOG, OPERATOR_COLOR), flush = True)
     else:

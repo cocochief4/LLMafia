@@ -35,7 +35,7 @@ class LLMPlayer(ABC):
         if chat_room_open_time:  # if the game has started, the file isn't empty
             system_info += f"The game's chat room was open at [{chat_room_open_time}].\n"
             system_info += f"The other players in the game are:\n"
-            with open (self.game_dir / GAME_CONFIG_FILE, "r") as f:
+            with open (self.game_dir / GAME_CONFIG_FILE, "r", encoding='utf-8') as f:
                 config = json.load(f)
                 players = (self.game_dir / "player_names.txt").read_text().splitlines()
                 remaining_players = (self.game_dir / "remaining_players.txt").read_text().splitlines()

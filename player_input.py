@@ -29,7 +29,7 @@ def collect_vote(name, game_dir):
     remaining_player_names.remove(name)  # players shouldn't vote for themselves
     voted_name = get_player_name_from_user(remaining_player_names,
                                            GET_VOTED_NAME_MESSAGE_FORMAT.format(name))
-    with open(game_dir / PERSONAL_VOTE_FILE_FORMAT.format(name), "a") as f:
+    with open(game_dir / PERSONAL_VOTE_FILE_FORMAT.format(name), "a", encoding='utf-8') as f:
         f.write(voted_name + "\n")
 
 
@@ -52,7 +52,7 @@ def write_text_to_game_loop(name, is_mafia, game_dir):
             while is_time_to_vote(game_dir):
                 continue  # wait for voting time to end when all players have voted
         elif not is_time_to_vote(game_dir):  # if it's time to vote then players can't chat
-            with open(game_dir / PERSONAL_CHAT_FILE_FORMAT.format(name), "a") as f:
+            with open(game_dir / PERSONAL_CHAT_FILE_FORMAT.format(name), "a", encoding='utf-8') as f:
                 f.write(format_message(name, user_input))
 
 

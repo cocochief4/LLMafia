@@ -396,6 +396,7 @@ class OpenAI_o4_mini(LLM):
         messages = self.pipeline_preprocessing(input_text, system_info)
         """ self.logger.log("Pipeline messages - System", messages[0]["content"])
         self.logger.log("Pipeline messages - User", messages[1]["content"]) """
+        self.logger.log("Complete Prompt to LLM", messages["input"])
         raw = self._call_llm(messages)
         processed_output = self.postprocess_pipeline(raw)
         self.logger.log("Reasoning behind Output", processed_output["reasoning"])
