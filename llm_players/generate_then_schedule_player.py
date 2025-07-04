@@ -1,7 +1,7 @@
 from llm_players.llm_constants import turn_task_into_prompt, GENERATE_THEN_SCHEDULE_TYPE, \
     make_more_human_like
 from llm_players.llm_player import LLMPlayer
-from llm_players.llm_wrapper import LLMWrapper
+# from llm_players.llm_wrapper import LLMWrapper
 
 
 class GenerateThenSchedulePlayer(LLMPlayer):

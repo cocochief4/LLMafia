@@ -4,7 +4,7 @@ from game_status_checks import is_nighttime
 from llm_players.llm_constants import turn_task_into_prompt, SCHEDULE_THEN_GENERATE_TYPE, \
     make_more_human_like, SCHEDULING_GENERATION_PARAMETERS, TALKATIVE_PROMPT, ALT_TALKATIVE_PROMPT, QUIETER_PROMPT
 from llm_players.llm_player import LLMPlayer
-from llm_players.llm_wrapper import LLMWrapper
+# from llm_players.llm_wrapper import LLMWrapper
 
 
 def no_one_has_talked_yet_in_current_phase(message_history):

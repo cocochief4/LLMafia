@@ -200,15 +200,16 @@ def get_latest_game_id():
 
 def get_game_dir_from_argv():
     parser = argparse.ArgumentParser()
-    parser.add_argument("game_id", help=f"{GAME_ID_NUM_DIGITS}-digit game ID")
+    parser.add_argument("-i", "--id", default=None, help=f"{GAME_ID_NUM_DIGITS}-digit game ID")
     args = parser.parse_args()
     # Handle game_id
-    if not args.game_id:
-        args.game_id = get_latest_game_id()
-        print(colored(f"(!) No game ID provided, using the latest game ID: {args.game_id}", MANAGER_COLOR))
-    game_dir = Path(DIRS_PREFIX) / args.game_id
+    game_id = args.id
+    if game_id == None:
+        game_id = get_latest_game_id()
+        print(colored(f"(!) No game ID provided, using the latest game ID: {game_id}", MANAGER_COLOR))
+    game_dir = Path(DIRS_PREFIX) / game_id
     if not game_dir.exists():
-        raise ValueError(f"The provided game ID {args.game_id} doesn't belong to a configured game")
+        raise ValueError(f"The provided game ID {game_id} doesn't belong to a configured game")
     return game_dir
 
 

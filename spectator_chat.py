@@ -50,7 +50,7 @@ def welcome_player(game_dir):
 
 
 def display_lines_from_file(game_dir, file_name, num_read_lines, display_color):
-    with open(game_dir / file_name, "r") as f:
+    with open(game_dir / file_name, "r", encoding='utf-8') as f:
         lines = f.readlines()[num_read_lines:]
     if len(lines) > 0:  # this `if` in needed because of `print()` that is used for multithreading
         print()  # prevents the messages from being printed in the same line as the middle of input

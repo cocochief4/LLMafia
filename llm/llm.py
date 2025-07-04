@@ -4,14 +4,14 @@ import time
 from pathlib import Path
 from functools import cache
 
-import torch
-from transformers import (
+# import torch
+""" from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
     AutoModelForSeq2SeqLM,
     AutoConfig,
     pipeline as hf_pipeline,
-)
+) """
 import openai
 from together import Together
 from together.error import TogetherException
@@ -65,7 +65,7 @@ class LLM(abc.ABC):
         self.model_name = llm_config.get("model_name")
         self.llm_config = llm_config
         self.prompt_template = self._get_prompt_template()
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self._setup_generation_parameters()
         self._initialize()
         # Warm-up
@@ -317,7 +317,7 @@ class OpenAI_o4_mini(LLM):
     # o4-mini specific preprocessing
     def pipeline_preprocessing(self, input_text: str, system_info: str):
         input_msg = f"{system_info} + \n + {input_text} + \n"
-        reasoning_msg = {"effort" : "medium", 
+        reasoning_msg = {"effort" : "high", 
                          "summary" : "detailed"}
         return \
             { 

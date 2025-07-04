@@ -5,7 +5,7 @@ from game_constants import GAME_CONFIG_FILE, PLAYERS_KEY_IN_CONFIG, get_role_str
     MESSAGE_PARSING_PATTERN, SCHEDULING_DECISION_LOG, MODEL_CHOSE_TO_USE_TURN_LOG, MODEL_CHOSE_TO_PASS_TURN_LOG
 from llm_players.llm_constants import turn_task_into_prompt, GENERAL_SYSTEM_INFO, \
     PASS_TURN_TOKEN_KEY, USE_TURN_TOKEN_KEY, WORDS_PER_SECOND_WAITING_KEY, PASS_TURN_TOKEN_OPTIONS
-from llm_players.llm_wrapper import LLMWrapper
+# from llm_players.llm_wrapper import LLMWrapper
 from llm_players.logger import Logger
 
 from llm.llm import * # cocochief's implementation
